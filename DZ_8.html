@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HTML page with JS</title>
+</head>
+<body>
+
+<script>
+do {
+    let age = Number(prompt('Будь ласка, введіть ваш вік: '));
+    if (isNaN(age)) {
+        console.log(`Ви ввели не число!`);
+        continue;
+    };
+    if (age < 0) {
+        console.log(`Ви ввели від\'ємне число!`);
+        continue;
+    };
+    let lastNumberOfAge = age % 10;
+    switch(lastNumberOfAge) {
+        case 1:
+            console.log(`Вам ${age} рік`);
+            break;
+        case 2:
+        case 3:
+        case 4:
+            console.log(`Вам ${age} роки`);
+            break;
+        default:
+            console.log(`Вам ${age} років`);
+            break;
+    }
+    break;
+} while (true);
+</script>
+
+</body>
+</html>
