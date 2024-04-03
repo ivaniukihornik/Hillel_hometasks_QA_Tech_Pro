@@ -3,7 +3,7 @@
 Опис ДЗ: Написати свою реалізацію функції isNaN.
 */
 function customIsNaN(num) {
-    return String(Number(num)) === `NaN` ? true: false
+    return String(Number(num)) === `NaN` ? true : false
 }
 
 let data = `123`
