@@ -16,11 +16,21 @@ do {
         console.log(`Ви ввели від\'ємне число!`);
         continue;
     };
-    let lastNumberOfAge = age % 10;
-    switch(lastNumberOfAge) {
-        case 1:
+    if (age > 130) {
+        console.log(`Вітаємо! Ви - вже мертві`);
+        break;
+    }
+    let lastDigitOfAge = age % 10;
+    let lastTwoDigitsOfAge = age % 100;
+    switch(lastDigitOfAge) {
+        case 1: {
+            if(lastTwoDigitsOfAge >= 10 && lastTwoDigitsOfAge <= 20) {
+                console.log(`Вам ${age} років`);
+                    break;
+            }
             console.log(`Вам ${age} рік`);
             break;
+        }
         case 2:
         case 3:
         case 4:
