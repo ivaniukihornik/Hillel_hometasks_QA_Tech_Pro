@@ -35,10 +35,11 @@ var services = {
             let serviceValue = parseInt(services[service])
             if(serviceValue < minPrice) minPrice = serviceValue
         }
-
+        
+        minPrice = `${minPrice} грн`
         resultObj = {};
         for (let service in this) {
-            if(parseInt(this[service]) == minPrice) {
+            if(this[service] == minPrice) {
                 resultObj[service] = minPrice;
             } 
         }
@@ -53,9 +54,10 @@ var services = {
             if(serviceValue > maxPrice) maxPrice = serviceValue
         } 
 
+        maxPrice = `${maxPrice} грн`
         resultObj = {};
         for (let service in this) {
-            if(parseInt(this[service]) == maxPrice) {
+            if(this[service] == maxPrice) {
                 resultObj[service] = maxPrice;
             } 
         }
