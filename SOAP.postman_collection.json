@@ -1,0 +1,336 @@
+{
+	"info": {
+		"_postman_id": "05632cf2-a75b-4ae2-96f3-12cf248946ac",
+		"name": "SOAP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34643160"
+	},
+	"item": [
+		{
+			"name": "Is Valid ISBN13 Number",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.text()\r",
+							"var responseHeaders = pm.response.headers\r",
+							"var requestBody = pm.request.body.raw\r",
+							"\r",
+							"pm.test('Status code is 200', function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test('Response body is in XML format', () => {\r",
+							"    pm.expect(responseHeaders.get('Content-Type')).includes('text/xml')\r",
+							"})\r",
+							"\r",
+							"pm.test('XML version in response is the same to the version in request', () => {\r",
+							"    var regex = /^(<\\?xml.* version=\"\\d+\\.\\d+\")/\r",
+							"    var expectedVersion = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualVersion = responseBody.match(regex)[0].split('\"')[1]\r",
+							"    \r",
+							"    pm.expect(expectedVersion).to.eql(actualVersion)\r",
+							"})\r",
+							"\r",
+							"pm.test('Encoding in response is the same to encoding in request', () => {\r",
+							"    var regex = /encoding=\".+\"/\r",
+							"    var expectedEncoding = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualEncoding = responseBody.match(regex)[0].split('\"')[1]\r",
+							"\r",
+							"    pm.expect(expectedEncoding).to.eql(actualEncoding)\r",
+							"})\r",
+							"\r",
+							"pm.test('\"Envelope\" element is present and alone in response', () => {\r",
+							"    var regex = /<soap:Envelope.+<\\/soap:Envelope>/s;\r",
+							"\r",
+							"    pm.expect(responseBody.match(regex).length).to.eql(1)\r",
+							"})\r",
+							"\r",
+							"pm.test('Envelope schema in response is the same to schema in request', () => {\r",
+							"    var regex = /<soap:Envelope.*xmlns:soap=\".+\">/\r",
+							"    var expectedSchema = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualSchema = responseBody.match(regex)[0].split('\"')[1]\r",
+							"\r",
+							"    pm.expect(expectedSchema).to.eql(actualSchema)\r",
+							"})\r",
+							"\r",
+							"pm.test('\"Body\" element is present and alone in response', () => {\r",
+							"    var regex = /<soap:Body.+<\\/soap:Body>/s;\r",
+							"    pm.expect(responseBody.match(regex).length).to.eql(1)\r",
+							"})\r",
+							"\r",
+							"pm.test('ISBN namespace from response is the same to schema in request', () => {\r",
+							"    var regex = /<.*IsValidISBN.+xmlns.*=\".+\"/\r",
+							"    var expectedNamespase = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualNamespace = responseBody.match(regex)[0].split('\"')[1]\r",
+							"\r",
+							"    pm.expect(expectedNamespase).to.eql(actualNamespace)\r",
+							"})\r",
+							"\r",
+							"pm.test('ISBN number in response is equal to number in request', () => {\r",
+							"    var regex = /<(|m:)IsValidISBN\\d{2}.+<.*IsValidISBN\\d{2}(|Response)>/s\r",
+							"    var expectedIsbn = requestBody.match(regex)[0].split('ISBN')[1].slice(0,2)\r",
+							"    var actualIsbn = responseBody.match(regex)[0].split('ISBN')[1].slice(0,2)\r",
+							"\r",
+							"    pm.expect(expectedIsbn).to.eql(actualIsbn)\r",
+							"})\r",
+							"\r",
+							"pm.test('Validation is correct', () => {\r",
+							"    var number = pm.collectionVariables.get('isbn13Number')\r",
+							"    var [prefixElement, registrationGroupElement, registrationElement, publicationElement, actualCheckSumStr] = number.split('-')\r",
+							"\r",
+							"    function calculateChecksum(arr) {\r",
+							"        var temp = 0;\r",
+							"        var index = 1\r",
+							"        arr.forEach((strNumber) => {\r",
+							"            for(var i = 0; i < strNumber.length; i++) {\r",
+							"                temp += parseInt(strNumber[i]) * index\r",
+							"                if (index == 1) {\r",
+							"                    index = 3\r",
+							"                } else {\r",
+							"                    index = 1\r",
+							"                }\r",
+							"            }\r",
+							"        })\r",
+							"        remainder = temp % 10\r",
+							"        return 10 - remainder\r",
+							"    }\r",
+							"\r",
+							"    var expectedCheckSum = calculateChecksum([prefixElement, registrationGroupElement, registrationElement, publicationElement])\r",
+							"\r",
+							"    var actualCheckSum = parseInt(actualCheckSumStr)\r",
+							"\r",
+							"    var expectedValidation = actualCheckSum === expectedCheckSum\r",
+							"    var regex = /<m:IsValidISBN13Result>\\w{4,5}<\\/m:IsValidISBN13Result>/\r",
+							"    var result = responseBody.match(regex)\r",
+							"    var actualValidation = true ? result[0].includes('true') : false\r",
+							"    \r",
+							"    pm.expect(expectedValidation).to.eql(actualValidation)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n  <soap:Body>\r\n    <IsValidISBN13 xmlns=\"http://webservices.daehosting.com/ISBN\">\r\n      <sISBN>978-92-95055-02-5</sISBN>\r\n    </IsValidISBN13>\r\n  </soap:Body>\r\n</soap:Envelope>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://webservices.daehosting.com/services/isbnservice.wso",
+					"protocol": "http",
+					"host": [
+						"webservices",
+						"daehosting",
+						"com"
+					],
+					"path": [
+						"services",
+						"isbnservice.wso"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Is Valid ISBN10 Number",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.text()\r",
+							"var responseHeaders = pm.response.headers\r",
+							"var requestBody = pm.request.body.raw\r",
+							"\r",
+							"pm.test('Status code is 200', function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test('Response body is in XML format', () => {\r",
+							"    pm.expect(responseHeaders.get('Content-Type')).includes('text/xml')\r",
+							"})\r",
+							"\r",
+							"pm.test('XML version in response is the same to the version in request', () => {\r",
+							"    var regex = /^(<\\?xml.* version=\"\\d+\\.\\d+\")/\r",
+							"    var expectedVersion = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualVersion = responseBody.match(regex)[0].split('\"')[1]\r",
+							"    \r",
+							"    pm.expect(expectedVersion).to.eql(actualVersion)\r",
+							"})\r",
+							"\r",
+							"pm.test('Encoding in response is the same to encoding in request', () => {\r",
+							"    var regex = /encoding=\".+\"/\r",
+							"    var expectedEncoding = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualEncoding = responseBody.match(regex)[0].split('\"')[1]\r",
+							"\r",
+							"    pm.expect(expectedEncoding).to.eql(actualEncoding)\r",
+							"})\r",
+							"\r",
+							"pm.test('\"Envelope\" element is present and alone in response', () => {\r",
+							"    var regex = /<soap:Envelope.+<\\/soap:Envelope>/s;\r",
+							"\r",
+							"    pm.expect(responseBody.match(regex).length).to.eql(1)\r",
+							"})\r",
+							"\r",
+							"pm.test('Envelope schema in response is the same to schema in request', () => {\r",
+							"    var regex = /<soap:Envelope.*xmlns:soap=\".+\">/\r",
+							"    var expectedSchema = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualSchema = responseBody.match(regex)[0].split('\"')[1]\r",
+							"\r",
+							"    pm.expect(expectedSchema).to.eql(actualSchema)\r",
+							"})\r",
+							"\r",
+							"pm.test('\"Body\" element is present and alone in response', () => {\r",
+							"    var regex = /<soap:Body.+<\\/soap:Body>/s;\r",
+							"    pm.expect(responseBody.match(regex).length).to.eql(1)\r",
+							"})\r",
+							"\r",
+							"pm.test('ISBN namespace from response is the same to schema in request', () => {\r",
+							"    var regex = /<.*IsValidISBN.+xmlns.*=\".+\"/\r",
+							"    var expectedNamespase = requestBody.match(regex)[0].split('\"')[1]\r",
+							"    var actualNamespace = responseBody.match(regex)[0].split('\"')[1]\r",
+							"\r",
+							"    pm.expect(expectedNamespase).to.eql(actualNamespace)\r",
+							"})\r",
+							"\r",
+							"pm.test('ISBN number in response is equal to number in request', () => {\r",
+							"    var regex = /<(|m:)IsValidISBN\\d{2}.+<.*IsValidISBN\\d{2}(|Response)>/s\r",
+							"    var expectedIsbn = requestBody.match(regex)[0].split('ISBN')[1].slice(0,2)\r",
+							"    var actualIsbn = responseBody.match(regex)[0].split('ISBN')[1].slice(0,2)\r",
+							"\r",
+							"    pm.expect(expectedIsbn).to.eql(actualIsbn)\r",
+							"})\r",
+							"\r",
+							"pm.test('Validation is correct', () => {\r",
+							"    var number = pm.collectionVariables.get('isbn10Number')\r",
+							"    var [groupIdentifier, publisherIdentifier, titleIdentifier, actualCheckSumStr] = number.split('-')\r",
+							"    var index = 10\r",
+							"\r",
+							"    function calculateChecksum(arr, index) {\r",
+							"        var temp = 0;\r",
+							"        arr.forEach((strNumber) => {\r",
+							"            for(var i = 0; i < strNumber.length; i++) {\r",
+							"            temp += parseInt(strNumber[i]) * index\r",
+							"            index--\r",
+							"            }\r",
+							"        })\r",
+							"        remainder = temp % 11\r",
+							"        return 11 - remainder\r",
+							"    }\r",
+							"\r",
+							"    var expectedCheckSum = calculateChecksum([groupIdentifier, publisherIdentifier, titleIdentifier], index)\r",
+							"\r",
+							"    if(actualCheckSumStr === 'X') {\r",
+							"        var actualCheckSum = 10\r",
+							"    } else {\r",
+							"        var actualCheckSum = parseInt(actualCheckSumStr)\r",
+							"    }\r",
+							"\r",
+							"    var expectedValidation = actualCheckSum === expectedCheckSum\r",
+							"    var regex = /<m:IsValidISBN10Result>\\w{4,5}<\\/m:IsValidISBN10Result>/\r",
+							"    var result = responseBody.match(regex)\r",
+							"    var actualValidation = true ? result[0].includes('true') : false\r",
+							"    \r",
+							"    pm.expect(expectedValidation).to.eql(actualValidation)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml; charset=utf-8"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n  <soap:Body>\r\n    <IsValidISBN10 xmlns=\"http://webservices.daehosting.com/ISBN\">\r\n      <sISBN>{{isbn10Number}}</sISBN>\r\n    </IsValidISBN10>\r\n  </soap:Body>\r\n</soap:Envelope>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://webservices.daehosting.com/services/isbnservice.wso",
+					"protocol": "http",
+					"host": [
+						"webservices",
+						"daehosting",
+						"com"
+					],
+					"path": [
+						"services",
+						"isbnservice.wso"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "isbn13Number",
+			"value": "978-0-596-52068-7",
+			"type": "string"
+		},
+		{
+			"key": "isbn10Number",
+			"value": "0-333-12345-X",
+			"type": "string"
+		}
+	]
+}
